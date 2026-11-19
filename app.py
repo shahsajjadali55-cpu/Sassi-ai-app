@@ -1,37 +1,34 @@
 import streamlit as st
-import urllib.parse, time
+import urllib.parse, time, requests
 
-st.set_page_config(page_title="All Video Maker - Larkana", layout="centered")
-st.markdown("<h1 style='text-align:center'>🎬 ہر قسم کی ویڈیو میکر - لاڑکانہ</h1>")
+st.set_page_config(page_title="AI VIDEO STUDIO PRO", layout="wide")
+st.markdown("<h1 style='text-align:center;color:green'>🎬 AI VIDEO STUDIO PRO - Unlimited No Watermark</h1>")
 
-# ہر قسم کی ویڈیو
-video_type = st.selectbox("ویڈیو کس قسم کی؟", 
-["Sassi Pannu - سسی پنہوں", "Love Story - عشق", "Funny - مزاحیہ", "Horror - ڈراؤنی", "Islamic - اسلامی", "Sindhi Culture - ثقافت", "Custom - اپنی مرضی"])
+c1,c2,c3,c4 = st.columns(4)
+with c1: vtype = st.selectbox("قسم", ["Sassi Pannu","Love Story","Sindhi","Islamic","Horror","Funny","Custom"])
+with c2: size = st.selectbox("سائز", ["9:16 TikTok","16:9 YouTube","1:1 Insta","4:5 FB"])
+with c3: qual = st.selectbox("کوالٹی", ["HD","Full HD","4K"])
+with c4: scenes = st.slider("سین", 1, 10, 4)
 
-story = st.text_area("📝 اپنی کہانی لکھو (اردو/سندھی/انگلش):", 
-"Ek khubsurat larki Thar desert mein...", height=120)
+script = st.text_area("📝 اسکرپٹ لکھو - کردار خود بنے گا:", "Sassi 20 year old Sindhi girl in red ajrak, Thar desert, waiting for Panhun, sad, cinematic", height=130)
 
-style = st.selectbox("سٹائل:", ["Real Human - اصلی انسان", "Cartoon - کارٹون", "Cinematic - فلمی", "3D - تھری ڈی"])
+if "9:16" in size: W,H=720,1280
+elif "16:9" in size: W,H=1280,720
+elif "1:1" in size: W,H=1024,1024
+else: W,H=864,1080
 
-if st.button("🚀 ہر قسم کی ویڈیو بناؤ - Download"):
-    st.write("⏳ ویڈیو بن رہی ہے سائیں... 30 سیکنڈ...")
-    
-    base_prompt = ""
-    if style == "Real Human - اصلی انسان":
-        base_prompt = "photorealistic real human, ultra realistic, DSLR photo, 8k, natural skin, real face"
-    elif style == "Cartoon - کارٹون":
-        base_prompt = "cartoon style, animated, colorful"
-    elif style == "Cinematic - فلمی":
-        base_prompt = "cinematic movie scene, dramatic lighting, film grain"
-    else:
-        base_prompt = "3D render, pixar style"
-
-    for i in range(4):
-        full_prompt = f"{base_prompt}, {video_type}, {story}, scene {i+1}, highly detailed"
-        encoded = urllib.parse.quote(full_prompt)
-        img_url = f"https://image.pollinations.ai/prompt/{encoded}?width=720&height=1280&model=flux&nologo=true&seed={int(time.time())+i*50}"
-        st.image(img_url, caption=f"Scene {i+1} - {video_type}")
-
-    st.success("✅ ماشاءاللہ سائیں! ویڈیو تیار! Screen Record کر کے YouTube پر ڈال دو!")
-    st.info("💡 ٹپ: CapCut ایپ میں 4 تصویریں ڈالو + گانا لگاؤ = اصلی ویڈیو!")
+if st.button("🚀 PRO VIDEO BANAO - NO WATERMARK UNLIMITED", use_container_width=True):
+    prog = st.progress(0)
+    for i in range(scenes):
+        prog.progress((i+1)/scenes)
+        prompt = f"{script}, {vtype}, scene {i+1}, photorealistic real human Pakistani, 8k, no watermark, no logo, no text"
+        enc = urllib.parse.quote(prompt)
+        url = f"https://image.pollinations.ai/prompt/{enc}?width={W}&height={H}&seed={int(time.time())+i*99}&nologo=true&nofeed=true&model=flux"
+        st.image(url, caption=f"Scene {i+1} - {size} - No Watermark")
+        try:
+            r = requests.get(url, timeout=15)
+            st.download_button(f"📥 Download Scene {i+1}", r.content, f"pro_scene_{i+1}.jpg", key=f"{i}{time.time()}")
+        except: pass
+        if i < scenes-1: time.sleep(6)
+    st.success("✅ تیار سائیں! Download کر لو - No Watermark!")
     st.balloons()
